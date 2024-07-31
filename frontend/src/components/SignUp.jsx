@@ -4,13 +4,14 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { signUp } from "../redux/actions/user";
 import { clearError } from "../redux/reducers/userReducer";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const SignUp = ({ setTab }) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // State for confirm password
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSigning, setIsSigning] = useState(false);
 
   const dispatch = useDispatch();
@@ -20,17 +21,30 @@ const SignUp = ({ setTab }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Check if passwords match before proceeding
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
     setIsSigning(true);
     const name = `${firstName} ${lastName}`;
     dispatch(signUp({ name, email, password }));
   };
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const userInfo = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+          },
+        }
+      );
+      const { name, email } = userInfo.data;
+      dispatch(signUp({ name, email, password: "GoogleOAuth" }));
+    },
+    onError: (error) => toast.error("Google Sign-In failed"),
+  });
 
   useEffect(() => {
     if (user) {
@@ -134,7 +148,10 @@ const SignUp = ({ setTab }) => {
             </p>
           </div>
           <div className="mt-6 flex justify-center">
-            <button className="flex items-center justify-center bg-blue-500 text-white rounded-lg px-6 py-2 text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-auto">
+            <button
+              className="flex items-center justify-center bg-blue-500 text-white rounded-lg px-6 py-2 text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-auto"
+              onClick={googleLogin}
+            >
               Signup with Google
             </button>
           </div>

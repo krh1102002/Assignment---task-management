@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { signIn } from "../redux/actions/user";
 import { clearError } from "../redux/reducers/userReducer";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const SignIn = ({ setTab }) => {
   const [email, setEmail] = useState("");
@@ -20,6 +21,23 @@ const SignIn = ({ setTab }) => {
   const error = useSelector((state) => state.user.error);
 
   const navigate = useNavigate();
+
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      const userInfo = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`,
+          },
+        }
+      );
+      const { email } = userInfo.data;
+      dispatch(signIn({ email, password: "GoogleOAuth" }));
+    },
+    onError: (error) => toast.error("Google Sign-In failed"),
+  });
+
   useEffect(() => {
     if (user) {
       navigate("/tasks");
@@ -27,13 +45,15 @@ const SignIn = ({ setTab }) => {
       setIsSigning(false);
     }
   }, [user, navigate]);
+
   useEffect(() => {
     if (error && error.length > 0) {
       toast.error(error);
       setIsSigning(false);
       dispatch(clearError());
     }
-  }, [error]);
+  }, [error, dispatch]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen mx-4 md:mx-0">
       <div className="w-full max-w-md mx-5 md:mx-0">
@@ -85,7 +105,10 @@ const SignIn = ({ setTab }) => {
             </p>
           </div>
           <div className="mt-6 flex justify-center">
-            <button className="flex items-center justify-center bg-blue-500 text-white rounded-lg px-6 py-2 text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-auto">
+            <button
+              className="flex items-center justify-center bg-blue-500 text-white rounded-lg px-6 py-2 text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-auto"
+              onClick={googleLogin}
+            >
               Login with Google
             </button>
           </div>
