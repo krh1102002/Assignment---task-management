@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable react/prop-types */
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { signUp } from "../redux/actions/user";
 import { clearError } from "../redux/reducers/userReducer";
 import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
 const SignUp = ({ setTab }) => {
   const [firstName, setFirstName] = useState("");
@@ -41,9 +43,9 @@ const SignUp = ({ setTab }) => {
         }
       );
       const { name, email } = userInfo.data;
-      dispatch(signUp({ name, email, password: "GoogleOAuth" }));
+      dispatch(signUp({ name, email, isGoogleLogin: true }));
     },
-    onError: (error) => toast.error("Google Sign-In failed"),
+    onError: () => toast.error("Google Sign-In failed"),
   });
 
   useEffect(() => {

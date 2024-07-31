@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { signIn } from "../redux/actions/user";
 import { clearError } from "../redux/reducers/userReducer";
 import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
 
+// eslint-disable-next-line react/prop-types
 const SignIn = ({ setTab }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,9 +35,9 @@ const SignIn = ({ setTab }) => {
         }
       );
       const { email } = userInfo.data;
-      dispatch(signIn({ email, password: "GoogleOAuth" }));
+      dispatch(signIn({ email, isGoogleLogin: true }));
     },
-    onError: (error) => toast.error("Google Sign-In failed"),
+    onError: () => toast.error("Google Sign-In failed"),
   });
 
   useEffect(() => {
@@ -88,14 +90,15 @@ const SignIn = ({ setTab }) => {
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
                 type="submit"
+                disabled={isSigning}
               >
-                Login
+                {isSigning ? "Signing In..." : "Sign In"}
               </button>
             </div>
           </form>
           <div className="mt-6 text-center">
             <p className="text-sm font-bold">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <button
                 className="text-blue-500 hover:text-blue-700"
                 onClick={() => setTab("signup")}
@@ -108,6 +111,7 @@ const SignIn = ({ setTab }) => {
             <button
               className="flex items-center justify-center bg-blue-500 text-white rounded-lg px-6 py-2 text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-auto"
               onClick={googleLogin}
+              disabled={isSigning}
             >
               Login with Google
             </button>
