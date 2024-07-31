@@ -14,7 +14,7 @@ const ViewTaskModal = ({ isOpen, onClose }) => {
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h3 className="font-semibold text-xl pb-2 border-b">Task View</h3>
+      <h3 className="font-semibold text-xl pb-2 border-b">Task Details</h3>
       {task && (
         <div className="flex flex-col gap-2 py-1.5">
           <p>
@@ -23,9 +23,7 @@ const ViewTaskModal = ({ isOpen, onClose }) => {
           <p>
             <b>Description : </b> {task.description}
           </p>
-          <p>
-            <b>Status : </b> {status}
-          </p>
+
           <p>
             <b>Create On: </b> {task.createdAt?.substring(0, 10)}
           </p>

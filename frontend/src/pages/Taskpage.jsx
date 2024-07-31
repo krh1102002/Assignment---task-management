@@ -62,7 +62,7 @@ const Taskpage = () => {
           /> */}
           <TaskTable
             setEditModalOpen={setEditTaskModalOpen}
-            setDeleteMoalOpen={setDeleteTaskModalOpen}
+            setDeleteModalOpen={setDeleteTaskModalOpen}
             setViewModalOpen={setViewTaskModalOpen}
             allTasks={filteredTasks}
             setAddModalOpen={setAddTaskModalOpen}

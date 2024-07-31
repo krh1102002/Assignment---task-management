@@ -1,12 +1,8 @@
-/* eslint-disable react/prop-types */
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setCurrentTask,
-} from "../redux/reducers/taskReducer";
-
+import { setCurrentTask } from "../redux/reducers/taskReducer";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Button, TextField, Grid, Box } from "@mui/material";
+import { Button, TextField, Grid, Box, MenuItem } from "@mui/material";
 import { updateTask } from "../redux/actions/task";
 
 const TaskTable = ({
@@ -23,12 +19,11 @@ const TaskTable = ({
 
   useEffect(() => {
     if (allTasks) {
-      console.log(allTasks, "AllTAsks")
       const groupedTasks = allTasks.reduce(
         (acc, task) => {
-          if (task.status === "created" || task.status === 'todo') {
+          if (task.status === "created" || task.status === "todo") {
             acc.TODO.push(task);
-          } else if (task.status === "completed" || task.status === 'done') {
+          } else if (task.status === "completed" || task.status === "done") {
             acc.DONE.push(task);
           } else {
             acc["IN PROGRESS"].push(task);
@@ -37,7 +32,6 @@ const TaskTable = ({
         },
         { TODO: [], "IN PROGRESS": [], DONE: [] }
       );
-      console.log("Called");
       setTasks(groupedTasks);
     }
   }, [allTasks]);
@@ -58,7 +52,6 @@ const TaskTable = ({
   };
 
   const onDragEnd = (result) => {
-    console.log(result);
     const { source, destination } = result;
     if (!destination) return;
 
@@ -67,17 +60,12 @@ const TaskTable = ({
     const taskId = result.draggableId;
 
     if (sourceColumn !== destColumn) {
-      console.log(tasks)
       let sourceItems = Array.from(tasks[sourceColumn]);
       let destItems = Array.from(tasks[destColumn]);
-      console.log(sourceItems, destItems)
       let removed = sourceItems.find((task) => task._id === taskId);
       sourceItems = sourceItems.filter((task) => task._id !== taskId);
-      console.log(removed)
 
       destItems.push({ ...removed, status: destColumn.toLowerCase() });
-
-      console.log(sourceItems, "UpdatedSource", destItems, "UpdatedDest")
 
       setTasks((prev) => ({
         ...prev,
@@ -85,10 +73,7 @@ const TaskTable = ({
         [destColumn]: destItems,
       }));
 
-      console.log("Dispatching")
-      dispatch(
-        updateTask({ status: destColumn.toLowerCase(), id: taskId })
-      );
+      dispatch(updateTask({ status: destColumn.toLowerCase(), id: taskId }));
     } else {
       const items = Array.from(tasks[sourceColumn]);
       const [reorderedItem] = items.splice(source.index, 1);
@@ -107,12 +92,10 @@ const TaskTable = ({
         return tasksToSort.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-      case "oldest":
-        return tasksToSort.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
       case "title":
         return tasksToSort.sort((a, b) => a.title.localeCompare(b.title));
+      case "titleDesc":
+        return tasksToSort.sort((a, b) => b.title.localeCompare(a.title));
       default:
         return tasksToSort;
     }
@@ -129,6 +112,12 @@ const TaskTable = ({
     return acc;
   }, {});
 
+  const inputStyle = {
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    border: "1px solid #e0e0e0",
+    borderRadius: "4px",
+  };
+
   const TaskCard = ({ task, index }) => (
     <Draggable draggableId={task._id.toString()} index={index}>
       {(provided) => (
@@ -138,13 +127,10 @@ const TaskTable = ({
           {...provided.dragHandleProps}
           className="bg-blue-100 p-4 mb-4 rounded-lg shadow"
         >
-          <h3 className="font-bold">{task.title}</h3>
-          <p className="text-sm">{task.description}</p>
-          <p className="text-xs mt-2">
+          <h3 className="font-bold mb-1">{task.title}</h3>
+          <p className="text-sm font-semibold mb-5">{task.description}</p>
+          <p className="text-xs">
             Created at: {new Date(task.createdAt).toLocaleString()}
-          </p>
-          <p className="text-xs mt-2">
-            Due date: {new Date(task.dueDate).toLocaleString()}
           </p>
           <div className="mt-2 flex justify-end space-x-2">
             <button
@@ -173,8 +159,25 @@ const TaskTable = ({
 
   return (
     <Box p={2}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={6}>
+      <Grid
+        container
+        spacing={2}
+        alignItems="center"
+        justifyContent="space-between"
+      >
+        <Grid item xs={12} textAlign="left">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setAddModalOpen(true)}
+          >
+            + Add Task
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={4} display="flex" alignItems="center">
+          <Box mr={1} className="font-bold">
+            Search:
+          </Box>
           <TextField
             fullWidth
             variant="outlined"
@@ -182,12 +185,25 @@ const TaskTable = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             type="search"
+            InputProps={{ style: inputStyle }}
           />
         </Grid>
-        <Grid item xs={12} sm={6} textAlign="right">
-          <Button variant="contained" color="primary" onClick={() => setAddModalOpen(true)}>
-            + Add Task
-          </Button>
+        <Grid item xs={4} sm={2} display="flex" alignItems="center">
+          <Box mr={1} className="font-bold">
+            Sort:
+          </Box>
+          <TextField
+            select
+            fullWidth
+            variant="outlined"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            InputProps={{ style: inputStyle }}
+          >
+            <MenuItem value="recent">Recent</MenuItem>
+            <MenuItem value="title">A to Z</MenuItem>
+            <MenuItem value="titleDesc">Z to A</MenuItem>
+          </TextField>
         </Grid>
       </Grid>
       <Box mt={2}>
@@ -195,12 +211,7 @@ const TaskTable = ({
           <Grid container spacing={2}>
             {["TODO", "IN PROGRESS", "DONE"].map((status) => (
               <Grid item xs={12} md={4} key={status}>
-                <Box
-                  p={2}
-                  bgcolor="grey.200"
-                  borderRadius="borderRadius"
-                  boxShadow={1}
-                >
+                <Box p={2} borderRadius="borderRadius" boxShadow={1}>
                   <h2 className="font-bold text-lg mb-4 bg-blue-500 text-white p-2 rounded">
                     {status.replace("_", " ")}
                   </h2>

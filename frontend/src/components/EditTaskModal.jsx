@@ -47,7 +47,7 @@ const EditTaskModal = ({ isOpen, onClose }) => {
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col">
           <label htmlFor="title" className="text-sm font-semibold">
-            Title of Task
+            Title
           </label>
           <input
             type="test"
@@ -72,28 +72,7 @@ const EditTaskModal = ({ isOpen, onClose }) => {
             className="py-1 px-2 focus:outline-none border border-slate-800 rounded"
           />
         </div>
-        {status.length > 0 ? (
-          <div className="flex flex-col">
-            <label htmlFor="status" className="text-sm font-semibold">
-              Update Status
-            </label>
-            <select
-              id="status"
-              className="py-1 px-2 focus:outline-none border border-slate-800"
-              defaultValue={status.toLowerCase()}
-              onChange={(e) => setStatus(e.target.value)}
-            >
-              <option value="">Select Status</option>
-              <option value="inProgress">In Progress</option>
 
-              <option value="completed">Completed</option>
-            </select>
-          </div>
-        ) : (
-          <p className="text-center font-semibold text-gray-500">
-            Task Completed
-          </p>
-        )}
         <div className="flex justify-end gap-2 items-center pt-2">
           <button
             className="px-2 py-1 border border-slate-800 rounded cursor-pointer"
