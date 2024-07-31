@@ -1,6 +1,5 @@
-Sure! Here is the complete README file as requested:
 
-```markdown
+
 # Task-Management
 
 TaskManagement is a website built using React, Node.js, Express.js, MongoDB, and TailwindCSS where users can manage their tasks efficiently.
@@ -105,6 +104,5 @@ npm run dev
 ```
 
 After starting both frontend and backend servers, you can access the application on your browser.
-```
 
 This README file provides a comprehensive guide to setting up and running the TaskManagement application locally, including the necessary environment variables for Google Sign Up/Sign In functionality.
