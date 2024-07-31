@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  isGoogleLogin: false,
 });
 
 userSchema.pre("save", async function (next) {
