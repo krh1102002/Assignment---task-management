@@ -2,7 +2,14 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentTask } from "../redux/reducers/taskReducer";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { Button, TextField, Grid, Box, MenuItem } from "@mui/material";
+import {
+  Button,
+  TextField,
+  Grid,
+  Box,
+  MenuItem,
+  Typography,
+} from "@mui/material";
 import { updateTask } from "../redux/actions/task";
 
 const TaskTable = ({
@@ -157,6 +164,8 @@ const TaskTable = ({
     </Draggable>
   );
 
+  const hasTasks = Object.values(tasks).some((taskList) => taskList.length > 0);
+
   return (
     <Box p={2}>
       <Grid
@@ -164,73 +173,99 @@ const TaskTable = ({
         spacing={2}
         alignItems="center"
         justifyContent="space-between"
+        className="mb-3"
       >
-        <Grid item xs={12} textAlign="left">
+        <Grid item xs={12} md={2} textAlign="left">
           <Button
             variant="contained"
             color="primary"
             onClick={() => setAddModalOpen(true)}
+            fullWidth
           >
             + Add Task
           </Button>
         </Grid>
-        <Grid item xs={12} sm={4} display="flex" alignItems="center">
-          <Box mr={1} className="font-bold">
-            Search:
-          </Box>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            type="search"
-            InputProps={{ style: inputStyle }}
-          />
-        </Grid>
-        <Grid item xs={4} sm={2} display="flex" alignItems="center">
-          <Box mr={1} className="font-bold">
-            Sort:
-          </Box>
-          <TextField
-            select
-            fullWidth
-            variant="outlined"
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            InputProps={{ style: inputStyle }}
-          >
-            <MenuItem value="recent">Recent</MenuItem>
-            <MenuItem value="title">A to Z</MenuItem>
-            <MenuItem value="titleDesc">Z to A</MenuItem>
-          </TextField>
-        </Grid>
       </Grid>
-      <Box mt={2}>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Grid container spacing={2}>
-            {["TODO", "IN PROGRESS", "DONE"].map((status) => (
-              <Grid item xs={12} md={4} key={status}>
-                <Box p={2} borderRadius="borderRadius" boxShadow={1}>
-                  <h2 className="font-bold text-lg mb-4 bg-blue-500 text-white p-2 rounded">
-                    {status.replace("_", " ")}
-                  </h2>
-                  <Droppable droppableId={status}>
-                    {(provided) => (
-                      <div {...provided.droppableProps} ref={provided.innerRef}>
-                        {filteredAndSortedTasks[status].map((task, index) => (
-                          <TaskCard key={task._id} task={task} index={index} />
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </Box>
-              </Grid>
-            ))}
+      {hasTasks ? (
+        <>
+          <Grid
+            container
+            spacing={2}
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Grid item xs={12} sm={4} display="flex" alignItems="center">
+              <Box mr={1} className="font-bold">
+                Search:
+              </Box>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                type="search"
+                InputProps={{ style: inputStyle }}
+              />
+            </Grid>
+            <Grid item xs={8} sm={2} display="flex" alignItems="center">
+              <Box mr={1} className="font-bold">
+                Sort:
+              </Box>
+              <TextField
+                select
+                fullWidth
+                variant="outlined"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                InputProps={{ style: inputStyle }}
+              >
+                <MenuItem value="recent">Recent</MenuItem>
+                <MenuItem value="title">A to Z</MenuItem>
+                <MenuItem value="titleDesc">Z to A</MenuItem>
+              </TextField>
+            </Grid>
           </Grid>
-        </DragDropContext>
-      </Box>
+          <Box mt={2}>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Grid container spacing={2}>
+                {["TODO", "IN PROGRESS", "DONE"].map((status) => (
+                  <Grid item xs={12} md={4} key={status}>
+                    <Box p={2} borderRadius="borderRadius" boxShadow={1}>
+                      <h2 className="font-bold text-lg mb-4 bg-blue-500 text-white p-2 rounded">
+                        {status.replace("_", " ")}
+                      </h2>
+                      <Droppable droppableId={status}>
+                        {(provided) => (
+                          <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                          >
+                            {filteredAndSortedTasks[status].map(
+                              (task, index) => (
+                                <TaskCard
+                                  key={task._id}
+                                  task={task}
+                                  index={index}
+                                />
+                              )
+                            )}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </DragDropContext>
+          </Box>
+        </>
+      ) : (
+        <Box textAlign="center" mt={4}>
+          <Typography variant="h6">No tasks available</Typography>
+        </Box>
+      )}
     </Box>
   );
 };
